@@ -79,27 +79,27 @@ void test_class_()
 	v8pp::class_<X, Traits> X_class(isolate);
 	X_class
 		.ctor(&create_X<Traits>)
-		.set_const("konst", 99)
-		.set_var("var", &X::var)
-		.set_property("rprop", &X::get)
-		.set_property("wprop", &X::get, &X::set)
-		.set_property("wprop2", static_cast<x_prop_get>(&X::prop), static_cast<x_prop_set>(&X::prop))
-//TODO:		.set_property("lprop", [](X const& x) { return x.var; }, [](X& x, int n) { x.var = n; })
-		.set_function("fun1", &X::fun1)
-		.set_function("fun2", &X::fun2)
-		.set_function("fun3", &X::fun3)
-		.set_function("fun4", &X::fun4)
-		.set_function("static_fun", &X::static_fun)
-		.set_function("static_lambda", [](int x) { return x + 3; })
-		.set_function("extern_fun", extern_fun<Traits>)
+		.const_("konst", 99)
+		.var("var", &X::var)
+		.property("rprop", &X::get)
+		.property("wprop", &X::get, &X::set)
+		.property("wprop2", static_cast<x_prop_get>(&X::prop), static_cast<x_prop_set>(&X::prop))
+//TODO:		.property("lprop", [](X const& x) { return x.var; }, [](X& x, int n) { x.var = n; })
+		.function("fun1", &X::fun1)
+		.function("fun2", &X::fun2)
+		.function("fun3", &X::fun3)
+		.function("fun4", &X::fun4)
+		.function("static_fun", &X::static_fun)
+		.function("static_lambda", [](int x) { return x + 3; })
+		.function("extern_fun", extern_fun<Traits>)
 		;
 
 	v8pp::class_<Y, Traits> Y_class(isolate);
 	Y_class
 		.template inherit<X>()
 		.template ctor<int>()
-		.set_function("useX", &Y::useX)
-		.set_function("useX_ptr", &Y::useX_ptr<Traits>)
+		.function("useX", &Y::useX)
+		.function("useX_ptr", &Y::useX_ptr<Traits>)
 		;
 
 	check_ex<std::runtime_error>("already wrapped class X", [isolate]()
@@ -116,8 +116,8 @@ void test_class_()
 	});
 
 	context
-		.set_class("X", X_class)
-		.set_class("Y", Y_class)
+		.class_("X", X_class)
+		.class_("Y", Y_class)
 		;
 
 	check_eq("X object", run_script<int>(context, "x = new X(); x.var += x.konst"), 100);
@@ -236,34 +236,34 @@ void test_multiple_inheritance()
 
 	v8pp::class_<B, Traits> B_class(isolate);
 	B_class
-		.set_var("xB", &B::x)
-		.set_function("zB", &B::z)
-		.set_function("g", &B::g);
+		.var("xB", &B::x)
+		.function("zB", &B::z)
+		.function("g", &B::g);
 
 	v8pp::class_<C, Traits> C_class(isolate);
 	C_class
 		.template inherit<B>()
 		.template ctor<>()
-		.set_var("xA", &A::x)
-		.set_var("xC", &C::x)
+		.var("xA", &A::x)
+		.var("xC", &C::x)
 
-		.set_function("zA", &A::z)
-		.set_function("zC", &C::z)
+		.function("zA", &A::z)
+		.function("zC", &C::z)
 
-		.set_function("f", &A::f)
-		.set_function("h", &C::h)
+		.function("f", &A::f)
+		.function("h", &C::h)
 
-		.set_property("rF", &C::f)
-		.set_property("rG", &C::g)
-		.set_property("rH", &C::h)
+		.property("rF", &C::f)
+		.property("rG", &C::g)
+		.property("rH", &C::h)
 
-		.set_property("F", &C::f, &C::set_f)
-		.set_property("G", &C::g, &C::set_g)
-		.set_property("H", &C::h, &C::set_h)
+		.property("F", &C::f, &C::set_f)
+		.property("G", &C::g, &C::set_g)
+		.property("H", &C::h, &C::set_h)
 		;
 
 
-	context.set_class("C", C_class);
+	context.class_("C", C_class);
 	check_eq("get attributes", run_script<int>(context, "c = new C(); c.xA + c.xB + c.xC"), 1 + 2 + 3);
 	check_eq("set attributes", run_script<int>(context,
 		"c = new C(); c.xA = 10; c.xB = 20; c.xC = 30; c.xA + c.xB + c.xC"), 10 + 20 + 30);
